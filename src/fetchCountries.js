@@ -1,10 +1,11 @@
-export default function onClick(e) {
-  console.log(e.target.value);
-  fetchCountries(e.target.value);
-}
-function fetchCountries(name) {
-  return fetch(`https://restcountries.com/v2/${name}/${name}?fields=capital,currencies
-`)
-    .then(response => response.json())
-    .then(response => console.log(response));
+import Notiflix from 'notiflix';
+export default function fetchCountries(name) {
+  return fetch(`https://restcountries.com/v3.1/name/${name}?fields=name,capital,population,flags,languages
+
+`).then(response => {
+    if (!response.ok) {
+      Notiflix.Notify.failure('Oops, there is no country with that name');
+    }
+    return response.json();
+  });
 }
