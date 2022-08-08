@@ -3,6 +3,11 @@ var debounce = require('lodash.debounce');
 const DEBOUNCE_DELAY = 300;
 import fetchCountries from './fetchCountries.js';
 import Notiflix from 'notiflix';
+import countryItemTempl from './tamplates/country-item-template.hbs';
+import countryInfoTempl from './tamplates/country-info-template.hbs';
+
+var helpers = require('handlebars-helpers');
+var objectHelpers = helpers.object();
 
 const refs = {
   inputEl: document.querySelector('#search-box'),
@@ -13,11 +18,12 @@ const refs = {
 refs.inputEl.addEventListener('input', debounce(onClick, DEBOUNCE_DELAY));
 
 function onClick(e) {
+  //console.log(countryItemTempl(countries));
   refs.countryListEl.innerHTML = '';
   refs.countryInfoEl.innerHTML = '';
-  fetchCountries(e.target.value.trim()).then(countries =>
-    renderCountriesList(countries)
-  );
+  fetchCountries(e.target.value.trim()).then(countries => {
+    renderCountriesList(countries);
+  });
 }
 function renderCountriesList(countries) {
   if (countries.length > 10) {
@@ -25,29 +31,10 @@ function renderCountriesList(countries) {
       'Too many matches found. Please enter a more specific name.'
     );
   } else if (countries.length >= 2 && countries.length <= 10) {
-    const markup = countries
-      .map(country => {
-        return `<li class="country-item"><img class="country-item__image" src = "${country.flags.png}">${country.name.official}</li>`;
-      })
-      .join('');
+    const markup = countries.map(countryItemTempl).join('');
     refs.countryListEl.insertAdjacentHTML('beforeend', markup);
   } else if (countries.length === 1) {
-    refs.countryInfoEl.insertAdjacentHTML(
-      'beforeend',
-      `<h1 class="country-name"><img class="country-item__image" src = "${
-        countries[0].flags.png
-      }" alt = "${countries[0].name.official}">${
-        countries[0].name.official
-      }</h1>
-  <p class="country-info">
-  <b>Capital:</b> ${countries[0].capital}
-  </p>
-  <p class="country-info">
-  <b>Population:</b> ${countries[0].population}
-  </p>
-  <p class="country-info">
-  <b>Languages:</b> ${Object.values(countries[0].languages).join(', ')}
-  </p>`
-    );
+    const markup = countries.map(countryInfoTempl).join('');
+    refs.countryInfoEl.insertAdjacentHTML('beforeend', markup);
   }
 }
